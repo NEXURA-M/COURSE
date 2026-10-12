@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Avelia - Created by MUHAMMAD TAQI</title>
+<link rel="icon" href="icon.png">
+<style>
+    /* ============ BASE / RESET ============ */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
+
+    html, body {
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+        background: #000;
+        color: #fff;
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+    }
+
+    /* Hide scrollbars everywhere */
+    ::-webkit-scrollbar { display: none; }
+    * { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* ============ WALLPAPER ============ */
+    #wallpaper {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('bg3.jfif');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-color: #0b1220;
+        transition: background-image .45s ease-in-out;
+        z-index: 0;
+    }
+    #wallpaper::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, .32);
+    }
+
+    /* ============ SCREEN WRAPPER ============ */
+    .screen {
+        position: relative;
+        z-index: 10;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    /* ============ TAB SWITCHER ============ */
+    .tabs-wrap {
+        padding: 0 16px;
+        margin: 12px 0 4px;
+        z-index: 20;
+    }
+    .tabs {
+        display: flex;
+        background: rgba(0, 0, 0, .40);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, .10);
+        border-radius: 12px;
+        padding: 4px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    .tab {
+        flex: 1;
+        padding: 7px 0;
+        border-radius: 8px;
+        text-align: center;
+        color: rgba(255, 255, 255, .70);
+        background: transparent;
+        border: none;
+        font-family: inherit;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all .2s ease;
+    }
+    .tab:hover { color: #fff; }
+    .tab.active {
+        background: rgba(255, 255, 255, .20);
+        color: #fff;
+        font-weight: 700;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, .4);
+    }
+
+    /* ============ PAGES (HORIZONTAL SWIPE) ============ */
+    .pages {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        z-index: 20;
+    }
+    .page {
+        width: 100%;
+        flex: 0 0 100%;
+        scroll-snap-align: center;
+        padding: 16px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .page-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, .60);
+        margin-bottom: 14px;
+        padding: 0 4px;
+    }
+    .page-head .badge {
+        font-size: 10px;
+        letter-spacing: 0;
+        text-transform: none;
+        background: rgba(255, 255, 255, .10);
+        padding: 2px 8px;
+        border-radius: 999px;
+    }
+
+    /* ============ APP GRID & ICONS ============ */
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 22px 12px;
+        text-align: center;
+    }
+
+    .icon {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+        transition: transform .15s ease, opacity .15s ease;
+    }
+    .icon:active {
+        transform: scale(.92);
+        opacity: .85;
+    }
+
+    .icon-box {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        overflow: hidden;
+        padding: 2px;
+        background: rgba(255, 255, 255, .12);
+        border: 1px solid rgba(255, 255, 255, .18);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 8px 20px -4px rgba(0, 0, 0, .45), 0 4px 6px -2px rgba(0, 0, 0, .25);
+    }
+    .icon-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 13px;
+        display: block;
+    }
+    .icon-box.grad {
+        background: linear-gradient(135deg, rgba(14, 165, 233, .35), rgba(168, 85, 247, .35));
+    }
+    .icon-box.fallback {
+        background: linear-gradient(135deg, #6366f1, #a855f7);
+        border-radius: 13px;
+        color: #fff;
+        font-size: 22px;
+    }
+
+    .icon-label {
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: .01em;
+        margin-top: 6px;
+        width: 100%;
+        text-align: center;
+        line-height: 1.2;
+        padding: 0 2px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, .85);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* ============ PAGINATION DOTS ============ */
+    .dots {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 0;
+        z-index: 20;
+    }
+    .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, .40);
+        transition: all .3s ease;
+    }
+    .dot.active {
+        width: 20px;
+        background: #fff;
+    }
+
+    /* ============ FOOTER ============ */
+    footer {
+        padding: 10px 0;
+        text-align: center;
+        font-size: 11px;
+        letter-spacing: .06em;
+        font-weight: 500;
+        color: rgba(255, 255, 255, .82);
+        background: rgba(15, 23, 42, .65);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-top: 1px solid rgba(255, 255, 255, .10);
+        z-index: 20;
+    }
+    footer span {
+        font-weight: 700;
+        color: #38bdf8;
+    }
+
+    /* ============ THEME MODAL ============ */
+    #theme-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 60;
+        background: rgba(0, 0, 0, .82);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        display: flex;
+        flex-direction: column;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .3s ease;
+    }
+    #theme-modal.open {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .modal-head {
+        padding: 16px;
+        background: rgba(15, 23, 42, .92);
+        border-bottom: 1px solid rgba(255, 255, 255, .10);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-shrink: 0;
+    }
+    .modal-head h2 {
+        font-size: 16px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .modal-head p {
+        font-size: 12px;
+        color: #94a3b8;
+        margin-top: 3px;
+    }
+    .btn-round {
+        width: 34px;
+        height: 34px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, .10);
+        border: none;
+        color: #fff;
+        font-size: 14px;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all .2s ease;
+        flex-shrink: 0;
+    }
+    .btn-round:hover { background: rgba(255, 255, 255, .22); }
+    .btn-round:active { transform: scale(.9); }
+
+    .modal-body {
+        flex: 1;
+        padding: 16px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    #wallpaper-gallery {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+    }
+    @media (min-width: 640px) {
+        #wallpaper-gallery { grid-template-columns: repeat(4, 1fr); }
+    }
+    @media (min-width: 768px) {
+        #wallpaper-gallery { grid-template-columns: repeat(6, 1fr); }
+    }
+
+    .wp-item {
+        aspect-ratio: 9 / 16;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, .12);
+        background: #1e293b;
+        cursor: pointer;
+        position: relative;
+        transition: transform .15s ease;
+        box-shadow: 0 4px 10px -2px rgba(0, 0, 0, .5);
+    }
+    .wp-item:active { transform: scale(.9); }
+    .wp-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .wp-item .wp-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, .22);
+        transition: background .25s ease;
+    }
+    .wp-item:hover .wp-overlay { background: transparent; }
+</style>
+</head>
+<body>
+
+    <!-- Main Wallpaper Background -->
+    <div id="wallpaper"></div>
+
+    <!-- Screen -->
+    <div class="screen">
+
+        <!-- Tab Navigation Switcher -->
+        <div class="tabs-wrap">
+            <div class="tabs">
+                <button id="tab-0" class="tab active" onclick="switchPage(0)">📱 Apps</button>
+                <button id="tab-1" class="tab" onclick="switchPage(1)">🎮 Games</button>
+                <button id="tab-2" class="tab" onclick="switchPage(2)">🤖 AI Tools</button>
+            </div>
+        </div>
+
+        <!-- Horizontal Swipe Pages -->
+        <main id="scroll-container" class="pages">
+
+            <!-- Page 1: APPS -->
+            <section class="page">
+                <div class="page-head">
+                    <span>Main Applications</span>
+                    <span class="badge">Page 1</span>
+                </div>
+                <div class="grid" id="apps-grid"></div>
+            </section>
+
+            <!-- Page 2: GAMES -->
+            <section class="page">
+                <div class="page-head">
+                    <span>Games Arcade</span>
+                    <span class="badge">Page 2</span>
+                </div>
+                <div class="grid" id="games-grid"></div>
+            </section>
+
+            <!-- Page 3: AI TOOLS -->
+            <section class="page">
+                <div class="page-head">
+                    <span>AI Suite &amp; Tools</span>
+                    <span class="badge">Page 3</span>
+                </div>
+                <div class="grid" id="ai-grid"></div>
+            </section>
+
+        </main>
+
+        <!-- Pagination Dots -->
+        <div class="dots">
+            <span id="dot-0" class="dot active"></span>
+            <span id="dot-1" class="dot"></span>
+            <span id="dot-2" class="dot"></span>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            AVELIA OS &bull; CREATED BY <span>MUHAMMAD TAQI</span>
+        </footer>
+
+    </div>
+
+    <!-- Theme Wallpaper Gallery -->
+    <div id="theme-modal">
+        <div class="modal-head">
+            <div>
+                <h2>🎨 Theme Wallpapers</h2>
+                <p>Select background from your local collection</p>
+            </div>
+            <button onclick="closeThemeModal()" class="btn-round">✕</button>
+        </div>
+        <div class="modal-body">
+            <div id="wallpaper-gallery"></div>
+        </div>
+    </div>
+
+<script>
+    /* ============ APP DATA (all local / offline) ============ */
+    const APPS_DATA = [
+        { name: "JoyMix",        url: "APPS/joymix.html",        image: "joymix.png", emoji: "🎵" },
+        { name: "VIBE",          url: "APPS/vibe.html",          image: "vibe.png",   emoji: "✨" },
+        { name: "VS CODE",       url: "APPS/no/vs-code.html",                         emoji: "💻" },
+        { name: "NOVA NOTEPAD",  url: "APPS/no/nova.html",                            emoji: "📝" },
+        { name: "CLOUD FILE",    url: "APPS/no/c-file.html",                          emoji: "📁" },
+        { name: "MS EXCEL",      url: "APPS/no/ms-excel.html",                        emoji: "📊" },
+        { name: "FILE",          url: "APPS/no/files.html",                           emoji: "⚡" },
+        { name: "M TUBE",        url: "APPS/no/m-tube.html",                          emoji: "▶️" },
+        { name: "CLOUD",         url: "APPS/no/cloud.html",                           emoji: "☁️" },
+        { name: "CLOCK",         url: "APPS/no/clock.html",                           emoji: "⏰" },
+        { name: "NEXURA",        url: "APPS/browser/nexura.html",                     emoji: "🌐" },
+        { name: "CALCULATOR",    url: "APPS/no/calculator.html",                      emoji: "🧮" },
+        /* Theme tile -> opens the wallpaper gallery */
+        { name: "Theme",         action: "theme",                                     emoji: "🎨", theme: true }
+    ];
+
+    const GAMES_DATA = [
+        { name: "50+ Offline Games", url: "GAMES/50+.html",              image: "img/games/50+.jpg",              emoji: "🎮" },
+        { name: "FLAPPY BIRD",       url: "GAMES/flappy-bird.html",      image: "img/games/flappy-bird.jpg",      emoji: "🐦" },
+        { name: "HILL CLIMB RACING", url: "GAMES/hill-climb.html",       image: "img/games/hill-climb.jpg",       emoji: "🚗" },
+        { name: "LUDO",              url: "GAMES/ludo.html",             image: "img/games/ludo.jpg",             emoji: "🎲" },
+        { name: "SNAKE",             url: "GAMES/snake.html",            image: "img/games/snake.jpg",            emoji: "🐍" },
+        { name: "STONE PAPER",       url: "GAMES/sps.html",              image: "img/games/sps.jpg",              emoji: "✂️" },
+        { name: "STICKMAN SNIPER",   url: "GAMES/stickman-ss.html",      image: "img/games/stickman-ss.jpg",      emoji: "🎯" },
+        { name: "TETRIS",            url: "GAMES/tetris.html",           image: "img/games/tetris.jpg",           emoji: "🧱" },
+        { name: "TIC CROSS VS AI",   url: "GAMES/tic-cross-vs-ai.html",  image: "img/games/tic-cross-vs-ai.jpg",  emoji: "❌" },
+        { name: "TIC CROSS",         url: "GAMES/tic-cross.html",        image: "img/games/tic-cross.jpg",        emoji: "⭕" }
+    ];
+
+    const AI_DATA = [
+        { name: "LYRA AI",         url: "AI/lyra.html",     emoji: "🤖" },
+        { name: "LYRAMOON (VIDEO)",url: "AI/lyramoon.html", emoji: "🎬" },
+        { name: "VINZIND",         url: "AI/vinzind.html",  emoji: "⚡" }
+    ];
+
+    /* ============ LOCAL WALLPAPERS (OFFLINE) ============ */
+    const WALLPAPERS = [
+        "bg.jfif",
+        "vibe.png",
+        "lyra.jpg",
+        "joymix.png",
+        "bg1.jfif",
+        "bg2.jfif",
+        "bg3.jfif",
+        "bg4.jfif",
+        "bg5.jfif",
+        "bg6.jfif",
+        "bg7.jfif",
+        "img/games/flappy-bird.jpg",
+        "img/games/runner.jpg",
+        "bg8.jfif"
+    ];
+
+    /* ============ DEFAULT WALLPAPER ============ */
+    const DEFAULT_WALLPAPER = "bg3.jfif";
+
+    let currentPageIndex = 0;
+
+    /* ============ INIT ============ */
+    window.addEventListener('DOMContentLoaded', () => {
+        setDefaultWallpaper();   // 👈 Default bg3.jfif set on enter
+        renderApps();
+        renderGames();
+        renderAI();
+        renderWallpapers();
+        setupScrollListener();
+    });
+
+    /* ============ DEFAULT WALLPAPER (ON ENTER) ============ */
+    function setDefaultWallpaper() {
+        const saved = localStorage.getItem('avelia_wallpaper') || DEFAULT_WALLPAPER;
+        document.getElementById('wallpaper').style.backgroundImage = `url('${saved}')`;
+    }
+
+    /* ============ ICON BUILDER ============ */
+    function createIconElement(item) {
+        const container = document.createElement('div');
+        container.className = 'icon';
+
+        container.onclick = () => {
+            if (item.action === 'theme') {
+                openThemeModal();
+            } else {
+                // 👉 Directly open app page (NO iframe / NO embed)
+                openAppView(item.name, item.url);
+            }
+        };
+
+        let iconHtml = '';
+
+        if (item.image) {
+            iconHtml = `
+                <div class="icon-box">
+                    <img src="${item.image}" alt="${item.name}"
+                         onerror="this.onerror=null;this.parentNode.className='icon-box fallback';this.parentNode.innerHTML='${item.emoji || '📱'}'">
+                </div>
+            `;
+        } else if (item.theme) {
+            iconHtml = `
+                <div class="icon-box grad">
+                    <span>${item.emoji || '🎨'}</span>
+                </div>
+            `;
+        } else {
+            iconHtml = `
+                <div class="icon-box grad">
+                    <span>${item.emoji || '📱'}</span>
+                </div>
+            `;
+        }
+
+        container.innerHTML = `
+            ${iconHtml}
+            <span class="icon-label">${item.name}</span>
+        `;
+
+        return container;
+    }
+
+    /* ============ RENDERERS ============ */
+    function renderApps() {
+        const grid = document.getElementById('apps-grid');
+        grid.innerHTML = '';
+        APPS_DATA.forEach(app => grid.appendChild(createIconElement(app)));
+    }
+
+    function renderGames() {
+        const grid = document.getElementById('games-grid');
+        grid.innerHTML = '';
+        GAMES_DATA.forEach(game => grid.appendChild(createIconElement(game)));
+    }
+
+    function renderAI() {
+        const grid = document.getElementById('ai-grid');
+        grid.innerHTML = '';
+        AI_DATA.forEach(ai => grid.appendChild(createIconElement(ai)));
+    }
+
+    function renderWallpapers() {
+        const gallery = document.getElementById('wallpaper-gallery');
+        gallery.innerHTML = '';
+
+        WALLPAPERS.forEach((url, idx) => {
+            const item = document.createElement('div');
+            item.className = 'wp-item';
+            item.onclick = () => setWallpaper(url);
+            item.innerHTML = `
+                <img src="${url}" loading="lazy" alt="Wallpaper ${idx + 1}"
+                     onerror="this.style.display='none';this.parentNode.style.background='linear-gradient(135deg,#334155,#0f172a)';">
+                <div class="wp-overlay"></div>
+            `;
+            gallery.appendChild(item);
+        });
+    }
+
+    /* ============ WALLPAPER ============ */
+    function setWallpaper(url) {
+        document.getElementById('wallpaper').style.backgroundImage = `url('${url}')`;
+        localStorage.setItem('avelia_wallpaper', url);   // persist choice
+        closeThemeModal();
+    }
+
+    /* ============ THEME MODAL ============ */
+    function openThemeModal() {
+        document.getElementById('theme-modal').classList.add('open');
+    }
+
+    function closeThemeModal() {
+        document.getElementById('theme-modal').classList.remove('open');
+    }
+
+    /* ============ APP VIEW (DIRECT NAVIGATION — NO IFRAME) ============ */
+    function openAppView(title, url) {
+        if (!url) return;
+        // Same tab open karo — seedha page navigate hoga
+        window.location.href = url;
+
+        // 🔁 Agar naya tab me open karna ho to upar wali line hata kar ye use karo:
+        // window.open(url, '_blank', 'noopener');
+    }
+
+    /* ============ PAGE SWITCHING ============ */
+    function switchPage(pageIndex) {
+        const container = document.getElementById('scroll-container');
+        const width = container.clientWidth;
+        container.scrollTo({ left: width * pageIndex, behavior: 'smooth' });
+        updatePaginationUI(pageIndex);
+    }
+
+    function setupScrollListener() {
+        const container = document.getElementById('scroll-container');
+        container.addEventListener('scroll', () => {
+            const width = container.clientWidth;
+            if (width === 0) return;
+            const pageIndex = Math.round(container.scrollLeft / width);
+            if (pageIndex !== currentPageIndex) {
+                currentPageIndex = pageIndex;
+                updatePaginationUI(pageIndex);
+            }
+        });
+    }
+
+    function updatePaginationUI(pageIndex) {
+        const tabs = [
+            document.getElementById('tab-0'),
+            document.getElementById('tab-1'),
+            document.getElementById('tab-2')
+        ];
+        const dots = [
+            document.getElementById('dot-0'),
+            document.getElementById('dot-1'),
+            document.getElementById('dot-2')
+        ];
+
+        tabs.forEach((tab, i) => tab.classList.toggle('active', i === pageIndex));
+        dots.forEach((dot, i) => dot.classList.toggle('active', i === pageIndex));
+    }
+</script>
+</body>
+</html>
